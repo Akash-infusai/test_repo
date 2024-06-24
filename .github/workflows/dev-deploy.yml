@@ -21,7 +21,7 @@ jobs:
         run: |
           docker buildx create --name mybuilder
           docker buildx use mybuilder
-          docker buildx build --no-cache --platform linux/amd64,linux/arm64 -t myapp:latest .
+          docker buildx build --platform linux/amd64,linux/arm64 -t myapp:latest .
       
       - name: Log in to Docker Hub (if needed)
         uses: docker/login-action@v2
