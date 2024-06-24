@@ -45,8 +45,14 @@ jobs:
       - name: Pull Image from docker hub
         run: docker pull ${{ secrets.DOCKER_USERNAME }}/myapp:latest
 
+      - name: Stop and remove old container (if exists)
+        run: |
+          docker stop myapp || true
+          docker rm myapp || true
 
-        
+      - name: Remove old images
+        run: |
+          docker rmi -f ${{ secrets.DOCKER_USERNAME }}/myapp
         
   #     - name: Stop and remove old container (if exists)
   #       run: |
