@@ -18,10 +18,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
       
       - name: Build Docker image
-        run: |
-          docker buildx create --name myapp
-          docker buildx use myapp
-          docker buildx build --platform linux/amd64,linux/arm64 -t myapp:latest .
+        run: docker build --no-cache -t myapp:latest .
 
       - name: List Docker images
         run: docker images
