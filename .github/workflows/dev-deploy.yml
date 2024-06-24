@@ -30,8 +30,8 @@ jobs:
       
       - name: Push Docker image to Docker Hub (if needed)
         run: |
-          docker tag myapp:latest ${{ secrets.DOCKER_USERNAME }}/myapp:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/myapp:latest
+          docker tag andy081/myapp:latest
+          docker push andy081/myapp:latest
       
       - name: Deploy to EC2
         uses: appleboy/scp-action@master
