@@ -22,19 +22,15 @@ jobs:
           docker buildx create --name myapp
           docker buildx use myapp
           docker buildx build --platform linux/amd64,linux/arm64 -t myapp:latest .
+
+      - name: List Docker images
+        run: docker images
       
       - name: Log in to Docker Hub (if needed)
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-  #     - name: Build and push Docker image
-  #       run: |
-  #         cd /home/ubuntu/dev
-  #         # git pull origin design-main
-  #         docker build --no-cache -t andy081/myapp .
-  #         docker push andy081/myapp:latest
           
       - name: Tag Docker Image
         run: docker tag myapp:latest ${{ secrets.DOCKER_USERNAME }}/myapp:latest
