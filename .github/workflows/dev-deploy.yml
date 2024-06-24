@@ -1,60 +1,47 @@
-name: Deploy to EC2
+name: Deploy to AWS dev
 
 on:
+  workflow_dispatch: {}
   push:
     branches:
-      - dev  # Adjust branch as needed
+      - dev 
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  Build:
+    runs-on: ["self-hosted", "dev"]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      
-      - name: Build Docker image
-        run: |
-          docker buildx create --name myapp --use
-          docker buildx build --platform linux/amd64,linux/arm64 -t myapp:latest .
-      
-      - name: List Docker images for debugging
-        run: docker images
-      
-      - name: Verify Docker image exists
-        run: docker inspect myapp:latest
-      
-      - name: Log in to Docker Hub (if needed)
+        with:
+          ref: dev
+
+      - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      
-      - name: Push Docker image to Docker Hub (if needed)
+
+      - name: Build and push Docker image
         run: |
-          docker tag myapp:latest ${{ secrets.DOCKER_USERNAME }}/myapp:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/myapp:latest
-      
-      - name: Deploy to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}  # Your EC2 instance public IP or hostname
-          username: ${{ secrets.EC2_USERNAME }}  # SSH username
-          key: ${{ secrets.EC2_PRIVATE_KEY }}  # SSH private key
-          source: "."  # Source directory or files to copy
-          target: "/path/to/remote/directory"  # Target directory on EC2
-      
-      - name: SSH into EC2 and deploy Docker container
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}  # Your EC2 instance public IP or hostname
-          username: ${{ secrets.EC2_USERNAME }}  # SSH username
-          key: ${{ secrets.EC2_PRIVATE_KEY }}  # SSH private key
-          port: 22
-          script: |
-            cd /path/to/remote/directory
-            docker-compose down
-            docker-compose up -d
+          cd /home/ubuntu/dev
+          # git pull origin design-main
+          docker build --no-cache -t andy081/myapp .
+          docker push andy081/myapp:latest
+  Deploy:
+    needs: Build
+    runs-on: ["self-hosted", "dev"]
+    steps:
+      - name: Pull Image from docker hub
+        run: docker pull dev/myapp:latest
+
+      - name: Stop and remove old container (if exists)
+        run: |
+          docker stop myapp || true
+          docker rm myapp || true
+      - name: Remove old images
+        run: |
+          docker rmi -f andy081/myapp
+      - name: Run Docker container
+        run: |
+          docker run -d --name myapp -p 8000:8000 andy081/myapp:latest
