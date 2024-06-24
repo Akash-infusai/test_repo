@@ -53,6 +53,10 @@ jobs:
       - name: Remove old images
         run: |
           docker rmi -f ${{ secrets.DOCKER_USERNAME }}/myapp
+
+      - name: Run Docker container
+        run: |
+          docker run -d --name myapp -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/myapp:latest
         
   #     - name: Stop and remove old container (if exists)
   #       run: |
