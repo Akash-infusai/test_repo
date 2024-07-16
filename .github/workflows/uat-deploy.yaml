@@ -56,4 +56,4 @@ jobs:
 
       - name: Run Docker container
         run: |
-          docker run -d --name uat -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/uat:${{ github. run_number }}
+          docker run -d --name uat -p 8001:8000 ${{ secrets.DOCKER_USERNAME }}/uat:${{ github. run_number }}
